@@ -76,14 +76,17 @@ diff:
 
 allcheck: $(ALL_EMACS:%=.make/verbose-%)
 	@echo ""
-	@cat $(^:%=%/.make-test-log) | grep =====
+	@cat $^ | grep =====
 	@rm -rf $^
 
 .make/verbose-%: $(DEPENDS)
-	mkdir -p $@
-	cp -rf $(ELS) $(CORTELS) $(DEPENDS) $(ADDITON) $@/
-	cd $@; echo $(ELS) | xargs -n1 -t $* $(BATCHARGS) -f batch-byte-compile
-	cd $@; $* $(BATCHARGS) -l $(TESTFILE) -f cort-test-run | tee .make-test-log
+	bash -c "UUID=`uuidgen` &&
+docker run -itd --name \$${UUID} conao3/emacs:alpine-min-26.1 /bin/sh &&
+docker cp . \$${UUID}:/test &&
+docker exec \$${UUID} apk add make &&
+docker exec \$${UUID} sh -c \"cd test && make check\" &&
+docker stop \$${UUID} &&
+docker rm   \$${UUID}" | tee $@
 
 ##############################
 #
