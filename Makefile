@@ -27,12 +27,10 @@ all:
 # org-re-reveal requires ((emacs "24.4") (org "8.3") (htmlize "1.34"))
 
 TOP          := $(dir $(lastword $(MAKEFILE_LIST)))
-EMACS_RAW    := $(sort $(shell find `echo $$PATH | tr : ' '` -type f -name 'emacs-*' 2>/dev/null | sed 's|.*/||'))
-EXPECT_EMACS := 24.4 24.5
-EXPECT_EMACS  += 25.1 25.2 25.3
-EXPECT_EMACS  += 26.1 26.2
 
-ALL_EMACS    := $(filter $(EMACS_RAW),$(EXPECT_EMACS:%=emacs-%))
+UBUNTU_EMACS := 24.5
+ALPINE_EMACS := 25.3 26.1
+ALL_EMACS    := $(UBUNTU_EMACS:%=ubuntu-min-%) $(ALPINE_EMACS:%=alpine-min-%)
 
 DEPENDS      := org-plus-contrib htmlize
 ADDITON      := test-cases
@@ -58,7 +56,7 @@ all: build
 build: $(ELS:%.el=%.elc)
 
 %.elc: %.el $(DEPENDS)
-	$(BATCH) $(DEPENDS:%=-L %/) -f batch-byte-compile $<
+	$(EMACS) $(BATCHARGS) $(DEPENDS:%=-L %/) -f batch-byte-compile $<
 
 ##############################
 #
